@@ -1,14 +1,19 @@
+<div id='up'/>
+
 # Table of Contents
 1. [Concurrency](#concurrency)
    1. [sync.Cond](#synccond)
-   2. 
-
+   2. sync.WaitGroup
+   3. sync.Mutex, sync.RWMutex
+   4. [sync.Once](#synconce)
+2. [To Watch](#towatch)
 <div id='concurrency'/>
 
-##### Concurrency
+
+### Concurrency [^](#up)
 <div id='synccond'/>
 
-* sync.Cond -  уведомить разные горутины, (важно cond.L.Lock/Unlock). Вообще принято не использовать, возможно будет 
+* sync.Cond (Signal, Broadcast) -  уведомить разные горутины, (важно cond.L.Lock/Unlock). Вообще принято не использовать, возможно будет 
 удалено в версии 2go
 
 ```
@@ -46,10 +51,28 @@ func main() {
 }
 ```
 ---
+* sync.Mutex, sync.RWMutex (аналог lock)
+---
+<div id = "synconce"/>
 
+* sync.Once [^](#up)
+
+---
 >At the command prompt, type
 
+<div id='towatch'/>
 
-### ToWatch
 
-My favorite search engine is [Duck Duck Go](https://duckduckgo.com).
+
+### ToWatch [^](#up)
+
+[Concurrency is not parallelism](https://habr.com/ru/articles/761754/)
+
+[Go blog](https://go.dev/blog/all)
+
+[CPS Go](https://github.com/Q69K/using-cps-in-golang?ysclid=lovqsgfaae78260087)
+
+[MutexOrChannel](https://github.com/golang/go/wiki/MutexOrChannel)
+
+[design-patterns/go](https://refactoring.guru/ru/design-patterns/go)
+

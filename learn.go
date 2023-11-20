@@ -3,40 +3,59 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 func main() {
-	cond := sync.NewCond(&sync.Mutex{})
-	wg := sync.WaitGroup{}
-	data := make(map[string]string)
-	b := true
-
-	for i := 0; i < 2; i++ {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-
-			cond.L.Lock()
-			fmt.Printf("%d start wait\n", i)
-			if b {
-				cond.Wait()
-			}
-			fmt.Printf("%d read %s\n", i, data["key"])
-			cond.L.Unlock()
-		}(i)
+	type Button struct {
+		Clicked *sync.Cond
 	}
-	time.Sleep(1 * time.Second)
 
-	for i := 0; i < 2; i++ {
-		cond.L.Lock()
-		data["key"] = fmt.Sprintf("data-%d", i)
-		cond.Broadcast()
-		cond.L.Unlock()
-		time.Sleep(1 * time.Second)
+	button := Button{Clicked: sync.NewCond(&sync.Mutex{})}
+
+	subscribe := func(c *sync.Cond, fn func()) {
+		var running sync.WaitGroup
+		running.Add(1)
+		go func() {
+			running.Done()
+			c.L.Lock()
+			defer c.L.Unlock()
+			c.Wait()
+			fn()
+		}()
+		running.Wait()
 	}
-	time.Sleep(1 * time.Second)
-	b = false
 
-	wg.Wait()
+	var clicked sync.WaitGroup
+	clicked.Add(3)
+	subscribe(button.Clicked, func() {
+		fmt.Println("Fn1 end")
+		clicked.Done()
+	})
+	subscribe(button.Clicked, func() {
+		fmt.Println("Fn2 end")
+		clicked.Done()
+	})
+	subscribe(button.Clicked, func() {
+		fmt.Println("Fn3 end")
+		clicked.Done()
+	})
+
+	button.Clicked.Broadcast()
+	clicked.Wait()
+
+	clicked.Add(3)
+	subscribe(button.Clicked, func() {
+		fmt.Println("Fn1 end")
+		clicked.Done()
+	})
+	subscribe(button.Clicked, func() {
+		fmt.Println("Fn2 end")
+		clicked.Done()
+	})
+	subscribe(button.Clicked, func() {
+		fmt.Println("Fn3 end")
+		clicked.Done()
+	})
+	button.Clicked.Broadcast()
+	clicked.Wait()
 }
